@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>PayPal Checkout</title>
+    <script src="https://www.paypal.com/sdk/js?client-id=AZEi8TdWtA1ESCjzKGZD5mJR2DfsYD7yjZ2jguVYAFg3QtLqXLN6dzp09zIvT1dIEzBWXPeOySI9OG1f"></script>
+  </head>
+  <body>
+    <div id="paypal-button-container"></div>
+
+    <script>
+      function renderPayPalButton(amount, currency) {
+        paypal.Buttons({
+          createOrder: function (data, actions) {
+            return actions.order.create({
+              purchase_units: [
+                {
+                  amount: {
+                    value: amount,
+                    currency_code: currency
+                  }
+                }
+              ]
+            });
+          },
+          onApprove: function (data, actions) {
+            return actions.order.capture().then(function (details) {
+              alert('Transaction completed by ' + details.payer.name.given_name);
+            });
+          }
+        }).render('#paypal-button-container');
+      }
+
+      // 等待 RN 传值
+      window.addEventListener('message', function (event) {
+        try {
+          const { amount, currency } = JSON.parse(event.data);
+          renderPayPalButton(amount, currency);
+        } catch (e) {
+          console.error('Invalid message data', e);
+        }
+      });
+    </script>
+  </body>
+</html>
